@@ -2,89 +2,79 @@
   font-family: PingFangSC-Medium;
   // min-height:812px;
   .am-navbar-light {
-    z-index: 10;
-    background: #dec7a9;
-    padding-top: 0.05rem;
-    padding-bottom: 0.04rem;
+    height: 0.152rem;
+    background-color: #f7f7f7;
+    box-shadow: 0rem 0.001rem 0rem 0rem rgba(0, 0, 0, 0.3);
+    opacity: 0.96;
     span {
-      font-size: 0.046;
-      line-height: 0.04;
-      color: #fff;
-      letter-spacing: 0;
+      font-family: PingFangSC-Medium;
+      font-size: 0.046rem;
+      font-weight: normal;
+      font-stretch: normal;
+      line-height: 0.04rem;
+      letter-spacing: 0rem;
+      color: #000000;
     }
   }
-  .am-steps {
-    z-index: 10;
-    background: #dec7a9;
-    padding-top: 0.03rem;
-    padding-bottom: 0.02rem;
-    .icon_step {
-      width: 0.06rem;
-      height: 0.06rem;
-      border-radius: 50%;
-      background: #ddd;
-      font-size: 0.03rem;
-      line-height: 0.06rem;
-      color: #fff;
-    }
-    .current {
-      background: #fff;
-      color: #d1c7a9;
-    }
-    .am-steps-item-finish .am-steps-item-tail:after {
-      background: #fff;
-    }
-  }
-  // 得分
-  .huxian {
-    background: #dec7a9;
-    border-radius: 0 2rem;
-    position: relative;
-    width: 2rem;
-    height: 2rem;
-    -webkit-transform: translatey(-1.15rem) translatex(-0.5rem) rotate(-45deg);
-    -ms-transform: translatey(-1.15rem) translatex(-0.5rem) rotate(-45deg);
-    -o-transform: translatey(-1.15rem) translatex(-0.5rem) rotate(-45deg);
-    transform: translatey(-1.15rem) translatex(-0.5rem) rotate(-45deg);
-    .scoreandtitle {
-      -webkit-transform: rotate(45deg) translatex(0.6rem) translatey(0.9rem);
-      -ms-transform: rotate(45deg) translatex(0.6rem) translatey(0.9rem);
-      -o-transform: rotate(45deg) translatex(0.6rem) translatey(0.9rem);
-      transform: rotate(45deg) translatex(0.6rem) translatey(0.9rem);
-      text-align: center;
-      .title {
-        font-family: PingFangSC-Semibold;
-        font-size: 0.072rem;
-        font-weight: normal;
-        font-stretch: normal;
-        line-height: 0.064rem;
-        letter-spacing: 0rem;
-        color: #fefefe;
-      }
-      .time {
-        font-family: PingFangSC-Medium;
-        font-size: 0.032rem;
-        font-weight: normal;
-        font-stretch: normal;
-        line-height: 0.064rem;
-        letter-spacing: 0rem;
-        color: #ffffff;
-        margin-top: 0.01rem;
-      }
-      .title_ {
-        color: #fff;
-        height: 0.14rem;
-        position: relative;
-        top: 0.1rem;
+  .dashboarddiv {
+    text-align: center;
+    padding: 0.13rem 0;
+    .scoredash {
+      margin-top: 0.1rem;
+      div {
+        span {
+          font-family: PingFangSC-Semibold;
+          font-size: 0.035rem;
+          font-weight: normal;
+          font-stretch: normal;
+          line-height: 0.064rem;
+          letter-spacing: 0rem;
+        }
         .score {
+          font-style: italic;
           font-family: Arial-BlackItalic;
-          font-size: 0.187rem;
+          font-size: 0.173rem;
           font-weight: 900;
           font-stretch: normal;
           line-height: 0.04rem;
           letter-spacing: 0rem;
-          font-style: italic;
-          padding-right: 0.01rem;
+        }
+      }
+    }
+    .chapterName {
+      font-family: PingFangSC-Medium;
+      font-size: 0.04rem;
+      font-weight: normal;
+      font-stretch: normal;
+      line-height: 0.064rem;
+      letter-spacing: 0rem;
+      color: #333333;
+      margin-top:0.05rem;
+      div {
+        float: left;
+        width: 33%;
+      }
+      div:first-child {
+        div {
+          width: 0.155rem;
+          height: 0.005rem;
+          opacity: 0.2;
+          float:right;
+          background: linear-gradient(to right, #fff, #34373b);
+          border-radius: 0.003rem;
+          position: relative;
+          top:0.025rem;
+        }
+      }
+      div:last-child {
+        div{
+          width: 0.155rem;
+          height: 0.005rem;
+          background: linear-gradient(to right, #34373b, #fff);
+          border-radius: 0.003rem;
+          opacity: 0.2;
+          position: relative;
+          top:0.025rem;
         }
       }
     }
@@ -96,7 +86,7 @@
     margin-bottom: 0.15rem;
     .correctanderror {
       overflow: hidden;
-      width: 0.4rem;
+      width: 0.84rem;
       font-family: Arial-BoldMT;
       font-size: 0.037rem;
       font-weight: normal;
@@ -107,7 +97,7 @@
       margin: 0 auto;
       div {
         float: left;
-        width: 0.18rem;
+        width: 0.4rem;
         text-align: center;
         .correct {
           color: #57d37f;
@@ -189,16 +179,20 @@
     }
     // 考试介绍
     .introduction {
-      width: 0.814rem;
+      width: 0.868rem;
+      padding:0.03rem;
       margin: 0 auto;
-      margin-top: 0.3rem;
-      font-family: PingFangSC-Regular;
+      margin-top: 0.1rem;
+      background-color: #ebebeb;
+      border-radius: 0.011rem;
+
+      font-family: PingFangSC-Medium;
       font-size: 0.035rem;
       font-weight: normal;
       font-stretch: normal;
-      line-height: 0.048rem;
+      line-height: 0.056rem;
       letter-spacing: 0rem;
-      color: #cccccc;
+      color: #666666;
     }
   }
   // 下面的button
@@ -211,18 +205,57 @@
     font-size: 0.045rem;
     font-weight: normal;
     font-stretch: normal;
+    text-align: center;
     .am-button {
       border-radius: 0;
+    }
+    .seeAllTest{
+      font-family: PingFangSC-Medium;
+      font-size: 0.037rem;
+      font-weight: normal;
+      font-stretch: normal;
+      line-height: 0.064rem;
+      letter-spacing: 0rem;
+      color: #736b53;
+      margin-bottom: 0.08rem;
+    }
+    .seeAllTest:active{
+      color:#e0301e
     }
   }
   .nofull {
     .am-button {
       width: 0.932rem;
       margin: 0 auto;
+      margin-top:0.1rem
     }
   }
   .disabled {
     bottom: -0.15rem;
     transition: all 0.4s;
+  }
+  .excellent {
+    .ant-progress-circle-path {
+      stroke: #57d37f;
+    }
+    .scoredash {
+      color: #57d37f;
+    }
+  }
+  .good {
+    .ant-progress-circle-path {
+      stroke: #57d37f;
+    }
+    .scoredash {
+      color: #57d37f;
+    }
+  }
+  .failed {
+    .ant-progress-circle-path {
+      stroke: #de3228;
+    }
+    .scoredash {
+      color: #de3228;
+    }
   }
 }

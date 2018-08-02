@@ -2,7 +2,7 @@
  * @Author: Mao Guijun
  * @Date: 2018-07-18 11:30:06
  * @Last Modified by: Mao Guijun
- * @Last Modified time: 2018-07-20 22:12:00
+ * @Last Modified time: 2018-08-02 19:55:28
  */
 import React, { PureComponent } from 'react'
 import { injectIntl } from 'react-intl'
@@ -10,7 +10,7 @@ import { connect } from 'react-redux'
 import { pathJump } from '../../../utils/'
 import { titles as _tit, rootPath, tableAll, locale, timetest } from '../../../config'
 import Immutable from 'immutable'
-import { fetchQuestion, newResult } from '../modules/question'
+import { fetchQuestion, newResult, fetchChapterInfo } from '../modules/question'
 import {
   NavBar,
   Icon,
@@ -28,6 +28,7 @@ import { login } from '../../Login/modules/login'
 import { encryptAes, encryptSha256, formatSecondToMinute } from '../../../utils/common'
 import * as _ from 'lodash'
 // import QuestionList from './components/questionlist'
+import { message } from 'antd'
 const Step = Steps.Step
 const alert = Modal.alert
 const CheckboxItem = Checkbox.CheckboxItem
@@ -54,7 +55,7 @@ class Question extends React.Component {
     } = this.props
     const json = {
       mail: '1053475583@qq.com',
-      password: encryptAes(`${encryptSha256('Qwerty1.')},${new Date().getTime()}`),
+      password: encryptAes(`${encryptSha256('Qwerty3.')},${new Date().getTime()}`),
       type: '3',
       equipmentType: '2'
     }
@@ -67,8 +68,40 @@ class Question extends React.Component {
       dispatch,
       location: { search }
     } = this.props
-    const json = { limit: tableAll, interestFieldIds: search.slice(1) }
+    dispatch(fetchChapterInfo('chapter24')).then(e => {
+      if (e.error) {
+        message.error(e.error.message)
+      } else {
+        this.setState({
+          chapterInfo: e.payload.obj
+        })
+      }
+    })
+    
+    const questionList_ = JSON.parse(localStorage.getItem('questionList') || '[]')
+    const correctList_ = JSON.parse(localStorage.getItem('correctList') || '[]')
+    const errorList_ = JSON.parse(localStorage.getItem('errorList') || '[]')
+    console.log(73, questionList_, correctList_, errorList_)
+    if (
+      (questionList_ && questionList_.length > 0) ||
+      (correctList_ && correctList_.length > 0) ||
+      (errorList_ && errorList_.length > 0)
+    ) {
+      this.setState({
+        questionList: Immutable.fromJS(questionList_),
+        correctList: Immutable.fromJS(correctList_),
+        errorList: Immutable.fromJS(errorList_),
+        animating: false
+      })
+      return
+    }
+
+    const json = { limit: tableAll, chapterId: 'chapter24' }
     dispatch(fetchQuestion(json)).then(e => {
+      this.setState({
+        animating: false
+      })
+
       if (e.error) {
         console.log(e.error)
         // Toast.info(e.error, 1)
@@ -76,25 +109,24 @@ class Question extends React.Component {
       }
       console.log(57, e)
       this.setState({
-        questionList: Immutable.fromJS(e.payload.objs),
-        animating: false
+        questionList: Immutable.fromJS(e.payload.objs)
       })
     })
-    this.time = setInterval(() => {
-      const { timerest } = this.state
-      if (timerest < 1) {
-        clearInterval(this.time)
-        return
-      }
-      this.setState({
-        timerest: timerest - 1
-      })
-    }, 1000)
+    // this.time = setInterval(() => {
+    //   const { timerest } = this.state
+    //   if (timerest < 1) {
+    //     clearInterval(this.time)
+    //     return
+    //   }
+    //   this.setState({
+    //     timerest: timerest - 1
+    //   })
+    // }, 1000)
   }
 
-  componentWillUnmount () {
-    clearInterval(this.time)
-  }
+  // componentWillUnmount () {
+  //   clearInterval(this.time)
+  // }
 
   componentDidUpdate (prevProps, prevState) {
     const { questionList, Indexquestion } = this.state
@@ -197,7 +229,7 @@ class Question extends React.Component {
   /** 保存成绩 */
   saveResult = (cb, e) => {
     const { dispatch } = this.props
-    const { questionList, correctList, errorList, timerest } = this.state
+    const { questionList, correctList, errorList, timerest, chapterInfo } = this.state
     let questionList_ = questionList.toJS()
     const obj = _.groupBy(questionList_, 'interestFieldId')
     let arr = [] // 发送到后端的数据
@@ -231,6 +263,10 @@ class Question extends React.Component {
     }
     console.log(session)
     localStorage.setItem('testresult', JSON.stringify(session))
+    localStorage.setItem('questionList', JSON.stringify(questionList.toJS()))
+    localStorage.setItem('correctList', JSON.stringify(correctList.toJS()))
+    localStorage.setItem('errorList', JSON.stringify(errorList.toJS()))
+    localStorage.setItem('chapterInfo', JSON.stringify(chapterInfo))
     console.log(206, json)
     dispatch(newResult(json)).then(e => {
       if (e.error) {
@@ -264,21 +300,17 @@ class Question extends React.Component {
     if (questionList.getIn([`${questionList.size - 1}`, 'isSelected'])) {
       setTimeout(
         () =>
-          alert(
-            formatMessage({ id: 'questionbackAlertmessage2' }),
-            formatMessage({ id: 'questionbackAlertmessage2tip' }),
-            [
-              {
-                text: formatMessage({ id: 'saveandleave' }),
-                onPress: e => {
-                  this.saveResult(window.postMessage, e)
-                }
-              },
-              {
-                text: formatMessage({ id: 'continuesee' })
+          alert(formatMessage({ id: 'questionbackAlertmessage2' }), '', [
+            {
+              text: formatMessage({ id: 'saveandleave' }),
+              onPress: e => {
+                this.saveResult(window.postMessage, e)
               }
-            ]
-          ),
+            },
+            {
+              text: formatMessage({ id: 'continuesee' })
+            }
+          ]),
         100
       )
     } else {
@@ -300,6 +332,12 @@ class Question extends React.Component {
         100
       )
     }
+  }
+  /** 判断是否正确 */
+  getType = () => {
+    const { questionList, Indexquestion } = this.state
+    console.log(questionList.toJS())
+    return questionList.getIn([`${Indexquestion}`, 'isCorrect']) ? 'correct' : 'error'
   }
   render () {
     const {
@@ -327,13 +365,6 @@ class Question extends React.Component {
         >
           <span>{formatMessage({ id: 'appTitle' })}</span>
         </NavBar>
-        <div>
-          <Steps current={currentStep} direction='horizontal' size='small'>
-            <Step icon={<div className={'icon_step' + (currentStep > -1 ? ' current' : '')}>1</div>} />
-            <Step icon={<div className={'icon_step' + (currentStep > 0 ? ' current' : '')}>2</div>} />
-            <Step icon={<div className={'icon_step' + (currentStep > 1 ? ' current' : '')}>3</div>} />
-          </Steps>
-        </div>
         <div className='bar'>
           <div className='bar-item'>
             <div>{parseInt(questionList.size - correctList.size - errorList.size)}</div>
@@ -351,92 +382,89 @@ class Question extends React.Component {
             <div>{formatMessage({ id: 'questionerror' })}</div>
           </div>
           <div className='bar-item'>
-            <div>{formatSecondToMinute(timerest)}</div>
+            <div>{parseInt((correctList.size / questionList.size) * 100) || 0}</div>
             <div />
-            <div>{formatMessage({ id: 'timerest' })}</div>
-          </div>
-          <div className='bar-item'>
-            <div>
-              {parseInt((correctList.size / questionList.size) * 100)}
-              {'%'}
-            </div>
-            <div />
-            <div>{formatMessage({ id: 'correctrate' })}</div>
+            <div>{formatMessage({ id: 'correctscore' })}</div>
           </div>
         </div>
         <div>
-          <div className='container'>
-            <div className='title'>
-              <span style={{ paddingRight: '0.01rem' }}>
-                {formatMessage({ id: 'questionfromfield' })}
-                {':'}
-              </span>
-              <span>
+          {questionList.size > 0 ? (
+            <div className='container'>
+              <div className='questionTitle'>
+                <span>
+                  {questionList.getIn([`${Indexquestion}`, 'answer']) &&
+                  questionList.getIn([`${Indexquestion}`, 'answer']).length === 1
+                    ? formatMessage({ id: 'singleselect' })
+                    : formatMessage({ id: 'multiselect' })}
+                </span>
+                {Indexquestion + 1 + '. '}
                 {locale === 'en'
-                  ? questionList.getIn([`${Indexquestion}`, 'interestField', 'name_en'])
-                  : questionList.getIn([`${Indexquestion}`, 'interestField', 'name_zh'])}
-              </span>
-            </div>
-            <div className='questionTitle'>
-              {Indexquestion + 1 + '. '}
-              {locale === 'en'
-                ? questionList.getIn([`${Indexquestion}`, 'content_en'])
-                : questionList.getIn([`${Indexquestion}`, 'content_zh'])}
-            </div>
-            <div className='questionSeleter'>
-              {questionList.getIn([`${Indexquestion}`, 'choQueOptions']) &&
-                questionList.getIn([`${Indexquestion}`, 'choQueOptions']).map(item => {
-                  const status = this.getStatus(item)
-                  return (
-                    <div
-                      className={'questionItem' + ' ' + status}
-                      key={item.get('id')}
-                      onTouchStart={e => {
-                        this.onChange(item.get('id'))
-                      }}
-                    >
-                      {/* {!questionList.getIn([`${Indexquestion}`, 'isSelected']) && (
-                        <div className='checkbox'>
-                          {item.get('userselect') ? <i className='iconfont'>&#xe744;</i> : <i>{''}</i>}
-                          <span>{item.get('name')}</span>
-                        </div>
-                      )}
-                      {questionList.getIn([`${Indexquestion}`, 'isSelected']) && (
-                        <div className='checkbox'>
-                          {item.get('answer') ? (
-                            !!item.get('answer') === item.get('userselect') ? (
-                              <i className='iconfont'>&#xe744;</i>
-                            ) : (
-                              <i className='iconfont'>&#xe7ca;</i>
-                            )
-                          ) : (
+                  ? questionList.getIn([`${Indexquestion}`, 'content_en'])
+                  : questionList.getIn([`${Indexquestion}`, 'content_zh'])}
+              </div>
+              <div className='questionSeleter'>
+                {questionList.getIn([`${Indexquestion}`, 'choQueOptions']) &&
+                  questionList.getIn([`${Indexquestion}`, 'choQueOptions']).map(item => {
+                    const status = this.getStatus(item)
+                    const isSelected = questionList.getIn([`${Indexquestion}`, 'isSelected'])
+                    console.log(374, isSelected)
+                    return (
+                      <div
+                        className={'questionItem' + ' ' + status}
+                        style={isSelected ? { background: '#fff' } : {}}
+                        key={item.get('id')}
+                        onTouchStart={e => {
+                          this.onChange(item.get('id'))
+                        }}
+                      >
+                        {!status ? (
+                          <div className='checkbox'>
                             <i>{''}</i>
-                          )}
-                          <span>{item.get('name')}</span>
+                            <span>{item.get('name')}</span>
                           </div>
-                        )} */}
-                      {!status ? (
-                        <div className='checkbox'>
-                          <i>{''}</i>
-                          <span>{item.get('name')}</span>
-                        </div>
-                      ) : status === 'correct' ? (
-                        <div className='checkbox'>
-                          <i className='iconfont'>&#xe744;</i>
-                          <span>{item.get('name')}</span>
-                        </div>
-                      ) : (
-                        <div className='checkbox'>
-                          <i className='iconfont'>&#xe7ca;</i>
-                          <span>{item.get('name')}</span>
-                        </div>
-                      )}
-                      <div id={`selectitem_${item.get('id')}`} />
-                    </div>
-                  )
-                })}
+                        ) : status === 'correct' ? (
+                          <div className='checkbox'>
+                            <i className='iconfont'>&#xe744;</i>
+                            <span>{item.get('name')}</span>
+                          </div>
+                        ) : (
+                          <div className='checkbox'>
+                            <i className='iconfont'>&#xe7ca;</i>
+                            <span>{item.get('name')}</span>
+                          </div>
+                        )}
+                        <div id={`selectitem_${item.get('id')}`} />
+                      </div>
+                    )
+                  })}
+              </div>
+              {questionList.getIn([`${Indexquestion}`, 'isSelected']) && (
+                <div className={'correctanswer' + ` answer_${this.getType()}`}>
+                  <div className='answerTitle'>
+                    <span className='type'>{formatMessage({ id: `answer_${this.getType()}` })}</span>
+                    <span className='con'>
+                      {formatMessage({ id: 'correctAnswer' })}
+                      {'：'} {questionList.getIn([`${Indexquestion}`, 'answer'])}
+                    </span>
+                  </div>
+                  <div className='explain'>
+                    {locale === 'en'
+                      ? questionList.getIn([`${Indexquestion}`, 'explain_en'])
+                      : questionList.getIn([`${Indexquestion}`, 'explain_zh'])}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          ) : (
+            <div
+              style={{
+                margin: '0.2rem auto',
+                textAlign: 'center'
+              }}
+            >
+              没有题目
+            </div>
+          )}
           {!questionList.getIn([`${Indexquestion}`, 'isSelected']) && (
             <div className={'bottomButton nofull'}>
               <Button type='primary' onClick={() => this.answerCurrent()}>

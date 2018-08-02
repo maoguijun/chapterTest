@@ -1,7 +1,7 @@
 import { quiz_tableField as _quiz, personalCenter_info as _perT, homework_tableField as _homeT } from '../config'
 
 const language = {
-  appTitle: 'You Plus 定制课程',
+  appTitle: '章节考核',
   plxselectfild: '请选择课程领域',
   plxselectlessthen3: '最多选择3个领域进行测试',
   fieldAlertmessage: '您最多可以同时选择3个感兴趣领域进行测试',
@@ -21,32 +21,46 @@ const language = {
   questionerror: '答错',
   timerest: '时长',
   correctrate: '正确率',
+  answer_correct: '正确',
+  answer_error: '错误',
+  correctAnswer: '正确答案',
+  correctscore: '得分',
   questionfromfield: '题目来源',
+  multiselect: '多选',
+  singleselect: '单选',
   backToApp: '离开',
   ok_btn: '确定',
   pre_question: '上一题',
   next_question: '下一题',
   questionAlertmessage: '请先选择您认为正确的答案',
-  checkresult: '查看结果',
+  checkresult: '查看考核成绩',
   canceltest: '取消测试',
   continuetest: '继续测试',
   saveandleave: '保存离开',
   continuesee: '继续浏览',
-  questionbackAlertmessage1: `现在取消您将无法获得定制课程推荐
-  确定要离开吗？`,
-  questionbackAlertmessage2: `距离获得定制课程推荐只有一步了，
-  您确定要现在退出吗！
+  questionbackAlertmessage1: `当前离开将无法查看本次答题记录，
+  你确定要离开？`,
+  questionbackAlertmessage2: `当前正在进行考核，现在离开将不会
+  保存答题记录，你确定要离开？
   `,
   questionbackAlertmessage2tip: '（下次进行测试时可以看到前一次成绩）',
-  resultTitle: '测试结果',
+  resultTitle: '考核成绩',
   congratulation: '恭喜你完成测试',
   score: '分',
   testingtime: '测试时长',
   question: '题',
   correctRate: '测试准确率',
-  testintroduction1: '1.每道题分值相同，满分100分，以最后获得的总分给用户推荐该领域的课程',
-  testintroduction2: '2.每道题不同分值，满分100分，以最后获得的总分给用户推荐该领域的课程',
-  recommendcourse: '浏览课程推荐'
+  testintroduction1: `恭喜你完成考核，如果你想再复习一遍试题，可以点
+  击下方的重新考核按钮，再次进行试题考核，相信这
+  会更好的帮助你掌握知识`,
+  recommendcourse: '浏览课程推荐',
+  excellent: '成绩优秀',
+  good: '成绩良好',
+  failed: '不及格',
+  text_correct: '回答正确',
+  text_error: '回答错误',
+  seeAllTest: '查看全部试题',
+  testagain: '重新考核'
 }
 
 export default language

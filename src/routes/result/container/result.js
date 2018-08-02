@@ -2,7 +2,7 @@
  * @Author: Mao Guijun
  * @Date: 2018-07-18 11:30:06
  * @Last Modified by: Mao Guijun
- * @Last Modified time: 2018-07-20 15:52:52
+ * @Last Modified time: 2018-08-02 19:48:33
  */
 import React, { PureComponent } from 'react'
 import { injectIntl } from 'react-intl'
@@ -19,6 +19,8 @@ import {
 import Immutable from 'immutable'
 import { fetchResult } from '../modules/result'
 import { NavBar, Icon, Steps, WingBlank, WhiteSpace, Toast, Modal, Button } from 'antd-mobile'
+import { Progress } from 'antd'
+import '../../../../node_modules/antd/lib/progress/style/index'
 import './result_.scss'
 import { login } from '../../Login/modules/login'
 import { encryptAes, encryptSha256, formatSecondToMinute, toFixed } from '../../../utils/common'
@@ -38,10 +40,12 @@ class Result extends React.Component {
   // WARNING! To be deprecated in React v17. Use componentDidMount instead.
   componentWillMount () {
     const result = JSON.parse(localStorage.getItem('testresult') || null)
-    console.log(result)
+    const chapterInfo = JSON.parse(localStorage.getItem('chapterInfo') || null)
+    console.log(result, chapterInfo)
     if (result) {
       this.setState({
-        result: Immutable.fromJS(result)
+        result: Immutable.fromJS(result),
+        chapterInfo: Immutable.fromJS(chapterInfo)
       })
     } else {
       throw new Error('没有获取到考试结果！')
@@ -135,13 +139,37 @@ class Result extends React.Component {
       })
     )
   }
+  getPingjia = (persent = 0) => {
+    const {
+      intl: { formatMessage }
+    } = this.props
+    console.log(persent)
+    if (persent < 60) {
+      return 'failed'
+    }
+    if (persent >= 60 && persent < 90) {
+      return 'good'
+    }
+    if (persent >= 90) {
+      return 'excellent'
+    }
+  }
+  testAgain = () => {
+    const { dispatch } = this.props
+    localStorage.clear()
+    dispatch(pathJump(rootPath.question))
+  }
+  seeTest = () => {
+    const { dispatch } = this.props
+    dispatch(pathJump(rootPath.question))
+  }
   render () {
     const {
       intl: { formatMessage, locale },
       location: { pathname },
       count
     } = this.props
-    let { currentStep, result } = this.state
+    let { currentStep, result, chapterInfo } = this.state
 
     return (
       <div className='resultfile'>
@@ -155,29 +183,35 @@ class Result extends React.Component {
         >
           <span>{formatMessage({ id: 'resultTitle' })}</span>
         </NavBar>
-        <div>
-          <Steps current={currentStep} direction='horizontal' size='small'>
-            <Step icon={<div className={'icon_step' + (currentStep > -1 ? ' current' : '')}>1</div>} />
-            <Step icon={<div className={'icon_step' + (currentStep > 0 ? ' current' : '')}>2</div>} />
-            <Step icon={<div className={'icon_step' + (currentStep > 1 ? ' current' : '')}>3</div>} />
-          </Steps>
-        </div>
-        <div
-          style={{
-            overflow: 'hidden',
-            height: '0.45rem'
-          }}
-        >
-          <div className='huxian'>
-            <div className='scoreandtitle'>
-              <div className='title'>{formatMessage({ id: 'congratulation' })}</div>
-              <div className='time'>
-                {formatMessage({ id: 'testingtime' })} {formatSecondToMinute(result.get('testingtime'))}
-              </div>
-              <div className='title_'>
-                <span className='score'>{result.get('allCorrectRate')}</span>
-                <span>{formatMessage({ id: 'score' })}</span>
-              </div>
+        <div className={'dashboarddiv ' + this.getPingjia(result.get('allCorrectRate'))}>
+          <Progress
+            type='circle'
+            format={persent => {
+              return (
+                <div className='scoredash'>
+                  <div>
+                    <span className='score'>{persent}</span>
+                    <span>{formatMessage({ id: 'score' })}</span>
+                  </div>
+                  <div>
+                    <span>{formatMessage({ id: this.getPingjia(result.get('allCorrectRate')) })}</span>
+                  </div>
+                </div>
+              )
+            }}
+            percent={result.get('allCorrectRate')}
+            gapDegree={90}
+            gapPosition='bottom'
+            strokeWidth={6}
+            width={150}
+          />
+          <div className='chapterName'>
+            <div>
+              <div />
+            </div>
+            <div>{locale === 'en' ? chapterInfo.get('name_en') : chapterInfo.get('name_zh')}</div>
+            <div>
+              <div />
             </div>
           </div>
         </div>
@@ -185,41 +219,29 @@ class Result extends React.Component {
           <div className='correctanderror'>
             <div>
               <i className='iconfont correct'>&#xe744;</i>
+              <span>{formatMessage({ id: 'text_correct' })}</span>
               <span>{toFixed(result.get('correctsize'), 2)}</span>
-              {formatMessage({ id: 'question' })}
             </div>
             <div>|</div>
             <div>
               <i className='iconfont error'>&#xe7ca;</i>
+              <span>{formatMessage({ id: 'text_error' })}</span>
               <span>{toFixed(result.get('errorsize'), 2)}</span>
-              {formatMessage({ id: 'question' })}
             </div>
           </div>
-          <div className='correctRate'>
-            <span>{formatMessage({ id: 'correctRate' })}</span>
-            <span>
-              {result.get('allCorrectRate')}
-              {'%'}
-            </span>
-          </div>
-          <div className='ratewithfield'>{this.renderfield()}</div>
           <div className='introduction'>
             <p>{formatMessage({ id: 'testintroduction1' })}</p>
-            <p>{formatMessage({ id: 'testintroduction2' })}</p>
           </div>
         </div>
         <div className={'bottomButton nofull'}>
+          <a className='seeAllTest' onClick={this.seeTest}>{formatMessage({ id: 'seeAllTest' })}</a>
           <Button
             type='primary'
             onClick={() => {
-              if (window.originalPostMessage) {
-                window.postMessage(100)
-              } else {
-                throw Error('postMessage接口还未注入')
-              }
+              this.testAgain()
             }}
           >
-            {formatMessage({ id: 'recommendcourse' })}
+            {formatMessage({ id: 'testagain' })}
           </Button>
         </div>
       </div>
